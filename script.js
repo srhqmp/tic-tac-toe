@@ -124,6 +124,7 @@ const TicTacToe = (function () {
     };
 
     return {
+      getBoard: () => gameBoard.getBoard(),
       getWinner: () => {
         const winningMark = gameBoard.checkWinner();
         if (winningMark === "X") winner = player1.getType();
@@ -149,11 +150,33 @@ const TicTacToe = (function () {
   return { createGame };
 })();
 
+const DisplayDOM = (function () {
+  const createDisplay = (arr) => {
+    return {
+      renderGameboard: () => {
+        const gameboard = document.getElementById("gameboard");
+        console.log(arr);
+        arr.forEach((el) => {
+          const div = document.createElement("div");
+          div.classList.add("board-item");
+          gameboard.appendChild(div);
+          div.innerText = "X";
+        });
+      },
+    };
+  };
+
+  return { createDisplay };
+})();
+
 const ttt = TicTacToe.createGame();
-do {
-  const index = prompt("Select number");
-  ttt.placeMove(index);
-} while (ttt.getWinner() === null);
+const display = DisplayDOM.createDisplay(ttt.getBoard());
+display.renderGameboard();
+
+// do {
+//   const index = prompt("Select number");
+//   ttt.placeMove(index);
+// } while (ttt.getWinner() === null);
 
 const winner = ttt.getWinner();
 console.log(`WINNER: ${winner}`);
