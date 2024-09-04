@@ -1,13 +1,15 @@
 const PlayerFactory = (function () {
-  function createPlayer(type, symbol) {
+  function createPlayer(type, symbol, name) {
     return {
       getType: () => type,
       getSymbol: () => symbol,
+      getName: () => name,
     };
   }
+
   return {
-    createHuman: () => createPlayer("human", "X"),
-    createComputer: () => createPlayer("computer", "O"),
+    createHuman: (name) => createPlayer("human", "X", name),
+    createComputer: (name = "Computer") => createPlayer("computer", "O", name),
   };
 })();
 
@@ -111,11 +113,11 @@ const Gameboard = (function () {
 })();
 
 const TicTacToe = (function () {
-  const createGame = () => {
+  const createGame = (player1Name, player2Name = "Computer") => {
     let winner = null;
     const gameBoard = Gameboard.createBoard();
-    const player1 = PlayerFactory.createHuman();
-    const player2 = PlayerFactory.createComputer();
+    const player1 = PlayerFactory.createHuman(player1Name);
+    const player2 = PlayerFactory.createComputer(player2Name);
 
     const generateComputerMove = () => {
       const index = Math.floor(Math.random() * 9);
@@ -127,8 +129,8 @@ const TicTacToe = (function () {
       getBoard: () => gameBoard.getBoard(),
       getWinner: () => {
         const winningMark = gameBoard.checkWinner();
-        if (winningMark === "X") winner = player1.getType();
-        if (winningMark === "O") winner = player2.getType();
+        if (winningMark === "X") winner = player1.getName();
+        if (winningMark === "O") winner = player2.getName();
         return winner;
       },
       placeMove: (index) => {
@@ -183,22 +185,17 @@ const DisplayDOM = (function () {
   const updateDisplay = (gameInstance) => {
     display.renderGameboard();
     const winner = gameInstance.getWinner();
-    // if (winner !== null) {
-    //   alert(`The winner is: ${winner}`);
-    // }
+    if (winner !== null) {
+      alert(`The winner is: ${winner}`);
+    }
   };
 
   return { createDisplay, updateDisplay };
 })();
 
-const ttt = TicTacToe.createGame();
+const player1Name = prompt("Enter Player 1's name:");
+const player2Name = "Computer";
+
+const ttt = TicTacToe.createGame(player1Name, player2Name);
 const display = DisplayDOM.createDisplay(ttt);
 display.renderGameboard();
-
-// do {
-//   const index = prompt("Select number");
-//   ttt.placeMove(index);
-// } while (ttt.getWinner() === null);
-
-// const winner = ttt.getWinner();
-// console.log(`WINNER: ${winner}`);
