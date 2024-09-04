@@ -27,11 +27,18 @@ const Gameboard = (function () {
 
     const allEqual = (arr) => arr.every((v) => v === arr[0]);
 
+    const checkTie = () => {
+      return gameBoard.every((cell) => cell !== null) && winner === null;
+    };
+
     return {
-      resetBoard: () => (gameBoard = new Array(9).fill(null)),
+      resetBoard: () => {
+        gameBoard = new Array(9).fill(null);
+        winner = null;
+      },
       getBoard: () => gameBoard,
       placeMove: (index, player) => {
-        if (index < 0 || index > gameBoard.length) {
+        if (index < 0 || index >= gameBoard.length) {
           console.log("ERROR: Index is beyond game board index. (0-8)");
           return false;
         } else if (gameBoard[index] === null) {
@@ -45,63 +52,32 @@ const Gameboard = (function () {
         }
       },
       checkWinner: () => {
-        if (
-          gameBoard[0] !== null &&
-          gameBoard[1] !== null &&
-          gameBoard[2] !== null &&
-          allEqual([gameBoard[0], gameBoard[1], gameBoard[2]])
-        ) {
-          winner = gameBoard[0];
-        } else if (
-          gameBoard[3] !== null &&
-          gameBoard[4] !== null &&
-          gameBoard[5] !== null &&
-          allEqual([gameBoard[3], gameBoard[4], gameBoard[5]])
-        ) {
-          winner = gameBoard[3];
-        } else if (
-          gameBoard[6] !== null &&
-          gameBoard[7] !== null &&
-          gameBoard[8] !== null &&
-          allEqual([gameBoard[6], gameBoard[7], gameBoard[8]])
-        ) {
-          winner = gameBoard[6];
-        } else if (
-          gameBoard[0] !== null &&
-          gameBoard[3] !== null &&
-          gameBoard[6] !== null &&
-          allEqual([gameBoard[0], gameBoard[3], gameBoard[6]])
-        ) {
-          winner = gameBoard[0];
-        } else if (
-          gameBoard[1] !== null &&
-          gameBoard[4] !== null &&
-          gameBoard[7] !== null &&
-          allEqual([gameBoard[1], gameBoard[4], gameBoard[7]])
-        ) {
-          winner = gameBoard[1];
-        } else if (
-          gameBoard[2] !== null &&
-          gameBoard[5] !== null &&
-          gameBoard[8] !== null &&
-          allEqual([gameBoard[2], gameBoard[5], gameBoard[8]])
-        ) {
-          winner = gameBoard[2];
-        } else if (
-          gameBoard[0] !== null &&
-          gameBoard[4] !== null &&
-          gameBoard[8] !== null &&
-          allEqual([gameBoard[0], gameBoard[4], gameBoard[8]])
-        ) {
-          winner = gameBoard[0];
-        } else if (
-          gameBoard[2] !== null &&
-          gameBoard[4] !== null &&
-          gameBoard[6] !== null &&
-          allEqual([gameBoard[2], gameBoard[4], gameBoard[6]])
-        ) {
-          winner = gameBoard[2];
+        const winConditions = [
+          [0, 1, 2],
+          [3, 4, 5],
+          [6, 7, 8],
+          [0, 3, 6],
+          [1, 4, 7],
+          [2, 5, 8],
+          [0, 4, 8],
+          [2, 4, 6],
+        ];
+
+        for (const [a, b, c] of winConditions) {
+          if (
+            gameBoard[a] !== null &&
+            gameBoard[a] === gameBoard[b] &&
+            gameBoard[a] === gameBoard[c]
+          ) {
+            winner = gameBoard[a];
+            return winner;
+          }
         }
+
+        if (checkTie()) {
+          winner = "Tie";
+        }
+
         return winner;
       },
     };
@@ -132,10 +108,11 @@ const TicTacToe = (function () {
         const winningMark = gameBoard.checkWinner();
         if (winningMark === "X") winner = player1.getName();
         if (winningMark === "O") winner = player2.getName();
+        if (winningMark === "Tie") winner = "Tie";
         return winner;
       },
       placeMove: (index) => {
-        if (winner !== null) return; // Game already won
+        if (winner !== null) return; // Game already won or tied
 
         let current;
         if (currentPlayer === "player1") {
@@ -203,7 +180,11 @@ const DisplayDOM = (function () {
     const messageElement = document.getElementById("message");
 
     if (winner !== null) {
-      messageElement.innerText = `The winner is: ${winner}`;
+      if (winner === "Tie") {
+        messageElement.innerText = "The game is a tie!";
+      } else {
+        messageElement.innerText = `The winner is: ${winner}`;
+      }
       document.getElementById("restart-game").style.display = "block"; // Show Restart Button
     } else {
       const currentTurn =
@@ -221,7 +202,7 @@ const DisplayDOM = (function () {
 
     startButton.addEventListener("click", () => {
       const playerName =
-        document.getElementById("player1-name").value || "Anonymous";
+        document.getElementById("player-name").value || "Anonymous";
       tiktactoe = TicTacToe.createGame(playerName);
       display = createDisplay(tiktactoe);
       display.renderGameboard();
@@ -232,7 +213,7 @@ const DisplayDOM = (function () {
 
     restartButton.addEventListener("click", () => {
       const playerName =
-        document.getElementById("player1-name").value || "Anonymous";
+        document.getElementById("player-name").value || "Anonymous";
       tiktactoe.resetGame();
       tiktactoe = TicTacToe.createGame(playerName);
       display = createDisplay(tiktactoe);
