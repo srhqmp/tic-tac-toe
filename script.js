@@ -154,6 +154,9 @@ const TicTacToe = (function () {
 })();
 
 const DisplayDOM = (function () {
+  let tiktactoe;
+  let display;
+
   const createDisplay = (gameInstance) => {
     return {
       renderGameboard: () => {
@@ -187,15 +190,34 @@ const DisplayDOM = (function () {
     const winner = gameInstance.getWinner();
     if (winner !== null) {
       alert(`The winner is: ${winner}`);
+      document.getElementById("restart-game").style.display = "block"; // Show Restart Button
     }
   };
 
-  return { createDisplay, updateDisplay };
+  const initGame = () => {
+    const startButton = document.getElementById("start-game");
+    const restartButton = document.getElementById("restart-game");
+
+    startButton.addEventListener("click", () => {
+      const player1Name = prompt("Enter Player 1's name:");
+      tiktactoe = TicTacToe.createGame(player1Name);
+      display = createDisplay(tiktactoe);
+      display.renderGameboard();
+      startButton.style.display = "none"; // Hide Start Button
+      restartButton.style.display = "block"; // Show Restart Button
+    });
+
+    restartButton.addEventListener("click", () => {
+      tiktactoe.resetGame();
+      display.renderGameboard();
+    });
+  };
+
+  return {
+    createDisplay,
+    updateDisplay,
+    initGame,
+  };
 })();
 
-const player1Name = prompt("Enter Player 1's name:");
-const player2Name = "Computer";
-
-const ttt = TicTacToe.createGame(player1Name, player2Name);
-const display = DisplayDOM.createDisplay(ttt);
-display.renderGameboard();
+DisplayDOM.initGame();
