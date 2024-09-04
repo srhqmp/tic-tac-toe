@@ -8,8 +8,7 @@ const PlayerFactory = (function () {
   }
 
   return {
-    createHuman: (name) => createPlayer("human", "X", name),
-    createComputer: (name = "Computer") => createPlayer("computer", "O", name),
+    createPlayer: (name, symbol) => createPlayer("human", symbol, name),
   };
 })();
 
@@ -87,18 +86,12 @@ const Gameboard = (function () {
 })();
 
 const TicTacToe = (function () {
-  const createGame = (playerName) => {
+  const createGame = (player1Name, player2Name) => {
     let winner = null;
     let currentPlayer = "player1"; // Track whose turn it is
     const gameBoard = Gameboard.createBoard();
-    const player1 = PlayerFactory.createHuman(playerName);
-    const player2 = PlayerFactory.createComputer("Computer");
-
-    const generateComputerMove = () => {
-      const index = Math.floor(Math.random() * 9);
-      const success = gameBoard.placeMove(index, player2);
-      if (!success) generateComputerMove();
-    };
+    const player1 = PlayerFactory.createPlayer(player1Name, "X");
+    const player2 = PlayerFactory.createPlayer(player2Name, "O");
 
     return {
       getBoard: () => gameBoard.getBoard(),
@@ -109,6 +102,8 @@ const TicTacToe = (function () {
         if (winningMark === "Tie") winner = "Tie";
         return winner;
       },
+      getCurrentPlayerName: () =>
+        currentPlayer === "player1" ? player1.getName() : player2.getName(),
       placeMove: (index) => {
         if (winner !== null) return; // Game already won or tied
 
@@ -122,10 +117,8 @@ const TicTacToe = (function () {
         const success = gameBoard.placeMove(index, current);
         if (success) {
           winner = gameBoard.checkWinner();
-          if (winner === null && currentPlayer === "player1") {
-            currentPlayer = "player2";
-            generateComputerMove();
-            currentPlayer = "player1";
+          if (winner === null) {
+            currentPlayer = currentPlayer === "player1" ? "player2" : "player1";
           }
         }
       },
@@ -177,6 +170,7 @@ const DisplayDOM = (function () {
     display.renderGameboard();
     const winner = gameInstance.getWinner();
     const messageElement = document.getElementById("message");
+    const currentPlayerName = gameInstance.getCurrentPlayerName();
 
     if (winner !== null) {
       if (winner === "Tie") {
@@ -186,12 +180,7 @@ const DisplayDOM = (function () {
       }
       document.getElementById("restart-game").style.display = "block"; // Show Restart Button
     } else {
-      const currentTurn =
-        gameInstance.getBoard().filter((el) => el === null).length % 2 === 0
-          ? "player2"
-          : "player1";
-      messageElement.innerText =
-        currentTurn === "player1" ? "Your turn" : "Computer's turn";
+      messageElement.innerText = `${currentPlayerName}'s turn`;
     }
   };
 
@@ -200,24 +189,28 @@ const DisplayDOM = (function () {
     const restartButton = document.getElementById("restart-game");
 
     startButton.addEventListener("click", () => {
-      const playerName =
-        document.getElementById("player-name").value || "Anonymous";
-      tiktactoe = TicTacToe.createGame(playerName);
+      const player1Name =
+        document.getElementById("player-name-1").value || "Player 1";
+      const player2Name =
+        document.getElementById("player-name-2").value || "Player 2";
+      tiktactoe = TicTacToe.createGame(player1Name, player2Name);
       display = createDisplay(tiktactoe);
       display.renderGameboard();
       startButton.style.display = "none"; // Hide Start Button
       restartButton.style.display = "block"; // Show Restart Button
-      document.getElementById("message").innerText = "Your turn"; // Initial message
+      document.getElementById("message").innerText = `${player1Name}'s turn`; // Initial message
     });
 
     restartButton.addEventListener("click", () => {
-      const playerName =
-        document.getElementById("player-name").value || "Anonymous";
+      const player1Name =
+        document.getElementById("player-name-1").value || "Player 1";
+      const player2Name =
+        document.getElementById("player-name-2").value || "Player 2";
       tiktactoe.resetGame();
-      tiktactoe = TicTacToe.createGame(playerName);
+      tiktactoe = TicTacToe.createGame(player1Name, player2Name);
       display = createDisplay(tiktactoe);
       display.renderGameboard();
-      document.getElementById("message").innerText = "Your turn"; // Reset message
+      document.getElementById("message").innerText = `${player1Name}'s turn`; // Reset message
     });
   };
 
