@@ -13,6 +13,7 @@ body {
   max-width: 600px;
   width: 100%;
   grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: repeat(3, 200px);
 }
 
 .board-item {

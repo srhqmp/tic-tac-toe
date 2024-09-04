@@ -132,11 +132,12 @@ const TicTacToe = (function () {
         return winner;
       },
       placeMove: (index) => {
+        winner = gameBoard.checkWinner();
         if (winner === null) {
           const success = gameBoard.placeMove(index, player1);
-          if (success) {
+          winner = gameBoard.checkWinner();
+          if (success && winner === null) {
             generateComputerMove();
-            winner = gameBoard.checkWinner();
           }
         }
       },
@@ -151,26 +152,47 @@ const TicTacToe = (function () {
 })();
 
 const DisplayDOM = (function () {
-  const createDisplay = (arr) => {
+  const createDisplay = (gameInstance) => {
     return {
       renderGameboard: () => {
         const gameboard = document.getElementById("gameboard");
-        console.log(arr);
-        arr.forEach((el) => {
+        gameboard.innerHTML = "";
+
+        const arr = gameInstance.getBoard();
+
+        arr.forEach((el, index) => {
           const div = document.createElement("div");
           div.classList.add("board-item");
+          div.ariaLabel = index;
+          div.innerText = el !== null ? el : "";
+
+          // Add event listener for click
+          div.addEventListener("click", () => {
+            if (gameInstance.getWinner() === null && arr[index] === null) {
+              gameInstance.placeMove(index);
+              updateDisplay(gameInstance);
+            }
+          });
+
           gameboard.appendChild(div);
-          div.innerText = "X";
         });
       },
     };
   };
 
-  return { createDisplay };
+  const updateDisplay = (gameInstance) => {
+    display.renderGameboard();
+    const winner = gameInstance.getWinner();
+    // if (winner !== null) {
+    //   alert(`The winner is: ${winner}`);
+    // }
+  };
+
+  return { createDisplay, updateDisplay };
 })();
 
 const ttt = TicTacToe.createGame();
-const display = DisplayDOM.createDisplay(ttt.getBoard());
+const display = DisplayDOM.createDisplay(ttt);
 display.renderGameboard();
 
 // do {
@@ -178,5 +200,5 @@ display.renderGameboard();
 //   ttt.placeMove(index);
 // } while (ttt.getWinner() === null);
 
-const winner = ttt.getWinner();
-console.log(`WINNER: ${winner}`);
+// const winner = ttt.getWinner();
+// console.log(`WINNER: ${winner}`);
