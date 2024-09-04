@@ -25,8 +25,6 @@ const Gameboard = (function () {
       return `${row1.join("")}\n${row2.join("")}\n${row3.join("")}\n`;
     };
 
-    const allEqual = (arr) => arr.every((v) => v === arr[0]);
-
     const checkTie = () => {
       return gameBoard.every((cell) => cell !== null) && winner === null;
     };
@@ -150,6 +148,7 @@ const DisplayDOM = (function () {
     return {
       renderGameboard: () => {
         const gameboard = document.getElementById("gameboard");
+        gameboard.style.display = "grid";
         gameboard.innerHTML = "";
 
         const arr = gameInstance.getBoard();
